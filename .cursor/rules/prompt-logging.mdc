@@ -1,0 +1,58 @@
+---
+description: Persist verbatim development and runtime prompt logs for this take-home.
+alwaysApply: true
+---
+
+# Prompt logging
+
+This project must keep a public, append-only record of prompts.
+
+## Files
+
+- `prompts/development_log.md` — user-authored Cursor prompts
+- `prompts/runtime_prompts.md` — system prompts used by the LedgerMatch agent
+
+## On every development request
+
+1. Append a new `## Prompt NNN` entry **before** doing the work. Use the next unused ID. Never reuse or renumber IDs.
+2. Paste the user's message **verbatim** under `### Original User Prompt`. Do not fix typos, and do not paraphrase.
+3. Fill `Date/Time` only if the conversation supplies it. Otherwise omit or write `unknown`.
+4. Do the requested work.
+5. Update **that same new entry** with Implementation, Result, and Issues and Learnings from what actually happened.
+6. Confirm in the reply that the entry was recorded (Prompt ID and file path).
+
+Do not overwrite or delete older entries. Later iterations are new IDs, with a note pointing at the earlier Prompt ID.
+
+## Honesty
+
+- Never invent prompts, timestamps, test results, or errors.
+- If an earlier prompt is not in this conversation, leave it unrecorded. Do not reconstruct it.
+- Never log API keys, credentials, or private financial records. Synthetic sample IDs are allowed.
+
+## Runtime prompts
+
+When adding or changing agent instructions, append a new version block in `prompts/runtime_prompts.md`. Keep the previous version intact. Copy the prompt text from code, not from memory.
+
+## Entry template
+
+```markdown
+## Prompt NNN — [Short Title]
+
+Date/Time: [Only if known]
+Phase: [Planning / Build / Test / Debug / Iteration]
+
+### Original User Prompt
+[Exact prompt text]
+
+### Objective
+[What this prompt was intended to achieve]
+
+### Implementation
+[What was actually changed]
+
+### Result
+[Actual outcome and test results]
+
+### Issues and Learnings
+[Failures, limitations, and lessons]
+```

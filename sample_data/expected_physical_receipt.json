@@ -1,0 +1,22 @@
+{
+  "source_filename": "physical_receipt.png",
+  "source_type": "image",
+  "merchant": "Whole Foods Market #10555",
+  "purchase_date": "2026-09-22",
+  "order_id": null,
+  "subtotal": 63.42,
+  "sales_tax": 8.98,
+  "total_amount": 72.40,
+  "currency": "USD",
+  "items": [
+    {"description": "Organic bananas", "amount": 3.49},
+    {"description": "Oat milk 64oz", "amount": 5.99},
+    {"description": "Sourdough loaf", "amount": 6.49},
+    {"description": "Salad kit", "amount": 8.99},
+    {"description": "Coffee beans 12oz", "amount": 14.99},
+    {"description": "Eggs 18ct", "amount": 7.49},
+    {"description": "Sparkling water 12pk", "amount": 6.99},
+    {"description": "Rotisserie chicken", "amount": 8.99}
+  ],
+  "notes": "Synthetic Whole Foods paper receipt for CC-202609-009. Not a real store ticket. Vision tests should allow minor description wording differences but keep amounts, date, merchant family, and total."
+}

@@ -1,0 +1,149 @@
+"""One-off renderer for the synthetic Whole Foods PNG. Stdlib only."""
+
+from __future__ import annotations
+
+import struct
+import zlib
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+OUT = ROOT / "physical_receipt.png"
+
+# 5x7 bitmap font, bits are columns top-to-bottom in each of 5 bytes.
+FONT = {
+    " ": [0, 0, 0, 0, 0],
+    "!": [0, 0, 0x5F, 0, 0],
+    "#": [0x14, 0x7F, 0x14, 0x7F, 0x14],
+    "$": [0x24, 0x2A, 0x7F, 0x2A, 0x12],
+    "%": [0x23, 0x13, 0x08, 0x64, 0x62],
+    "&": [0x36, 0x49, 0x55, 0x22, 0x50],
+    "'": [0, 0x07, 0x07, 0, 0],
+    "(": [0x1C, 0x22, 0x41, 0, 0],
+    ")": [0x41, 0x22, 0x1C, 0, 0],
+    "*": [0x14, 0x08, 0x3E, 0x08, 0x14],
+    "+": [0x08, 0x08, 0x3E, 0x08, 0x08],
+    ",": [0, 0x50, 0x30, 0, 0],
+    "-": [0x08, 0x08, 0x08, 0x08, 0x08],
+    ".": [0, 0x60, 0x60, 0, 0],
+    "/": [0x20, 0x10, 0x08, 0x04, 0x02],
+    "0": [0x3E, 0x51, 0x49, 0x45, 0x3E],
+    "1": [0x00, 0x42, 0x7F, 0x40, 0x00],
+    "2": [0x42, 0x61, 0x51, 0x49, 0x46],
+    "3": [0x21, 0x41, 0x45, 0x4B, 0x31],
+    "4": [0x18, 0x14, 0x12, 0x7F, 0x10],
+    "5": [0x27, 0x45, 0x45, 0x45, 0x39],
+    "6": [0x3C, 0x4A, 0x49, 0x49, 0x30],
+    "7": [0x01, 0x71, 0x09, 0x05, 0x03],
+    "8": [0x36, 0x49, 0x49, 0x49, 0x36],
+    "9": [0x06, 0x49, 0x49, 0x29, 0x1E],
+    ":": [0, 0x36, 0x36, 0, 0],
+    "=": [0x14, 0x14, 0x14, 0x14, 0x14],
+    "A": [0x7E, 0x11, 0x11, 0x11, 0x7E],
+    "B": [0x7F, 0x49, 0x49, 0x49, 0x36],
+    "C": [0x3E, 0x41, 0x41, 0x41, 0x22],
+    "D": [0x7F, 0x41, 0x41, 0x22, 0x1C],
+    "E": [0x7F, 0x49, 0x49, 0x49, 0x41],
+    "F": [0x7F, 0x09, 0x09, 0x09, 0x01],
+    "G": [0x3E, 0x41, 0x49, 0x49, 0x7A],
+    "H": [0x7F, 0x08, 0x08, 0x08, 0x7F],
+    "I": [0x00, 0x41, 0x7F, 0x41, 0x00],
+    "J": [0x20, 0x40, 0x41, 0x3F, 0x01],
+    "K": [0x7F, 0x08, 0x14, 0x22, 0x41],
+    "L": [0x7F, 0x40, 0x40, 0x40, 0x40],
+    "M": [0x7F, 0x02, 0x0C, 0x02, 0x7F],
+    "N": [0x7F, 0x04, 0x08, 0x10, 0x7F],
+    "O": [0x3E, 0x41, 0x41, 0x41, 0x3E],
+    "P": [0x7F, 0x09, 0x09, 0x09, 0x06],
+    "Q": [0x3E, 0x41, 0x51, 0x21, 0x5E],
+    "R": [0x7F, 0x09, 0x19, 0x29, 0x46],
+    "S": [0x26, 0x49, 0x49, 0x49, 0x32],
+    "T": [0x01, 0x01, 0x7F, 0x01, 0x01],
+    "U": [0x3F, 0x40, 0x40, 0x40, 0x3F],
+    "V": [0x1F, 0x20, 0x40, 0x20, 0x1F],
+    "W": [0x7F, 0x20, 0x18, 0x20, 0x7F],
+    "X": [0x63, 0x14, 0x08, 0x14, 0x63],
+    "Y": [0x07, 0x08, 0x70, 0x08, 0x07],
+    "Z": [0x61, 0x51, 0x49, 0x45, 0x43],
+}
+
+SCALE = 2
+PAD_X = 24
+PAD_Y = 28
+LINE_H = 18 * SCALE
+COL_W = 6 * SCALE
+WIDTH = 520
+LINES = [
+    "SYNTHETIC DEMO RECEIPT",
+    "NOT A REAL STORE TICKET",
+    "",
+    "Whole Foods Market #10555",
+    "Date: 2026-09-22",
+    "--------------------------------",
+    "Organic bananas           3.49",
+    "Oat milk 64oz             5.99",
+    "Sourdough loaf            6.49",
+    "Salad kit                 8.99",
+    "Coffee beans 12oz        14.99",
+    "Eggs 18ct                 7.49",
+    "Sparkling water 12pk      6.99",
+    "Rotisserie chicken        8.99",
+    "--------------------------------",
+    "Subtotal                 63.42",
+    "Sales tax (CA)            8.98",
+    "TOTAL                    72.40",
+    "Currency: USD",
+    "",
+    "Thank you for shopping.",
+    "LedgerMatch sample data only.",
+]
+
+
+def glyph(ch: str) -> list[int]:
+    return FONT.get(ch.upper(), FONT[" "])
+
+
+def chunk(tag: bytes, data: bytes) -> bytes:
+    return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+
+
+def main() -> None:
+    height = PAD_Y * 2 + LINE_H * len(LINES)
+    pixels = bytearray([255, 255, 255] * WIDTH * height)
+    ink = (20, 20, 20)
+
+    def set_px(x: int, y: int) -> None:
+        if 0 <= x < WIDTH and 0 <= y < height:
+            i = (y * WIDTH + x) * 3
+            pixels[i : i + 3] = bytes(ink)
+
+    y = PAD_Y
+    for line in LINES:
+        x = PAD_X
+        for ch in line:
+            bits = glyph(ch)
+            for col, column in enumerate(bits):
+                for row in range(7):
+                    if column & (1 << row):
+                        for dy in range(SCALE):
+                            for dx in range(SCALE):
+                                set_px(x + col * SCALE + dx, y + row * SCALE + dy)
+            x += COL_W
+        y += LINE_H
+
+    raw = bytearray()
+    for row in range(height):
+        raw.append(0)
+        start = row * WIDTH * 3
+        raw.extend(pixels[start : start + WIDTH * 3])
+    png = (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", WIDTH, height, 8, 2, 0, 0, 0))
+        + chunk(b"IDAT", zlib.compress(bytes(raw), 9))
+        + chunk(b"IEND", b"")
+    )
+    OUT.write_bytes(png)
+    print(f"wrote {OUT} ({len(png)} bytes, {WIDTH}x{height})")
+
+
+if __name__ == "__main__":
+    main()

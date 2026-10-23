@@ -1,0 +1,11 @@
+txn_id,posted_date,account_name,account_last4,description,merchant_raw,txn_type,amount,currency,reference,related_order_id,scenario,notes
+CC-202609-007,2026-09-05,Chase Sapphire,4242,AMAZON.COM*CASE4H,AMAZON.COM*CASE4H,charge,24.99,USD,REF-AMZ-CASE4H,ORD-AMZ-1005,missing_refund,Original charge for a later-refunded phone case. No card refund posted in September.
+CC-202609-001,2026-09-08,Chase Sapphire,4242,AMAZON.COM*2K8R1,AMAZON.COM*2K8R1,charge,42.16,USD,REF-AMZ-2K8R1,ORD-AMZ-1001,normal_matched_purchase,Single-shipment Amazon order. Also evidenced by amazon_receipt.eml.
+CC-202609-008,2026-09-11,Chase Sapphire,4242,COSTCO.COM *8282,COSTCO.COM *8282,charge,95.33,USD,REF-COSTCO-8282,ORD-COSTCO-2001,merchant_name_variation,Same purchase as Costco Wholesale online order ORD-COSTCO-2001.
+CC-202609-002,2026-09-12,Chase Sapphire,4242,AMZN MKTP US*HB1,AMZN MKTP US*HB1,charge,54.99,USD,REF-AMZ-HB1,ORD-AMZ-1002,amazon_split_shipment,First shipment of ORD-AMZ-1002. Not a standalone order total.
+CC-202609-010,2026-09-15,Chase Sapphire,4242,PAYMENT THANK YOU,CHASE AUTOPAY,payment,1204.00,USD,REF-PAY-1204,,credit_card_payment_from_bank,Credit-card payment. Counterpart is BK-202609-002. Not spend.
+CC-202609-003,2026-09-15,Chase Sapphire,4242,AMZN MKTP US*HB2,AMZN MKTP US*HB2,charge,32.51,USD,REF-AMZ-HB2,ORD-AMZ-1002,amazon_split_shipment,Second shipment of ORD-AMZ-1002. 54.99 + 32.51 = 87.50 order total.
+CC-202609-004,2026-09-18,Chase Sapphire,4242,AMAZON.COM*9X2Q,AMAZON.COM*9X2Q,charge,29.99,USD,REF-AMZ-9X2Q-A,ORD-AMZ-1003,possible_duplicate_card_charge,Intended true charge for wireless mouse ORD-AMZ-1003.
+CC-202609-005,2026-09-18,Chase Sapphire,4242,AMAZON.COM*9X2Q,AMAZON.COM*9X2Q,charge,29.99,USD,REF-AMZ-9X2Q-B,ORD-AMZ-1003,possible_duplicate_card_charge,Possible duplicate of CC-202609-004. Same date amount and descriptor; different reference.
+CC-202609-006,2026-09-20,Chase Sapphire,4242,AMZN MKTP US*QW9,AMZN MKTP US*QW9,charge,54.99,USD,REF-AMZ-QW9,ORD-AMZ-1004,order_card_amount_mismatch,Card posted 54.99; order total is 49.99. Gap 5.00.
+CC-202609-009,2026-09-22,Chase Sapphire,4242,WHOLEFDS #10555,WHOLEFDS #10555,charge,72.40,USD,REF-WFM-10555,,purchase_without_receipt,Posted grocery charge. No order or email evidence in this dataset.

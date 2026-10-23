@@ -1,0 +1,16 @@
+{
+  "source_filename": "amazon_receipt.eml",
+  "source_type": "email",
+  "merchant": "Amazon.com",
+  "purchase_date": "2026-09-07",
+  "order_id": "111-2345678-9012345",
+  "subtotal": 38.99,
+  "sales_tax": 3.17,
+  "total_amount": 42.16,
+  "currency": "USD",
+  "items": [
+    {"description": "6 ft HDMI cable", "amount": 19.99},
+    {"description": "Desk mouse pad", "amount": 19.00}
+  ],
+  "notes": "Synthetic Amazon confirmation for ORD-AMZ-1001 / CC-202609-001. Internal order id ORD-AMZ-1001 is also in the email body."
+}

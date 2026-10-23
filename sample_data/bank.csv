@@ -1,0 +1,4 @@
+txn_id,posted_date,account_name,account_last4,description,counterparty,txn_type,amount,currency,reference,related_txn_id,scenario,notes
+BK-202609-001,2026-09-01,Chase Checking,1103,ACME CORP PAYROLL,ACME CORP,deposit,3500.00,USD,REF-PAYROLL-0901,,none,Income. Not spend. Not a purchase receipt.
+BK-202609-002,2026-09-14,Chase Checking,1103,CHASE CREDIT CRD AUTOPAY,CHASE SAPPHIRE 4242,transfer,1204.00,USD,REF-PAY-1204,CC-202609-010,credit_card_payment_from_bank,Pays the credit card. Same 1204.00 as CC-202609-010. Exclude from spend.
+BK-202609-003,2026-09-20,Chase Checking,1103,TRANSFER TO SAVINGS XXX2218,CHASE SAVINGS 2218,transfer,500.00,USD,REF-SAV-2218,,none,Internal transfer. Not spend. Not duplicated on the card.

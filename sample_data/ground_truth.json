@@ -1,0 +1,230 @@
+{
+  "reporting_month": "2026-09",
+  "currency": "USD",
+  "household": "synthetic_demo",
+  "disclaimer": "All identifiers, merchants, and amounts are fictional. Orders and receipts are evidence. They are not a second spend ledger.",
+  "id_conventions": {
+    "card": "CC-202609-NNN",
+    "bank": "BK-202609-NNN",
+    "orders": "ORD-AMZ-NNNN or ORD-COSTCO-NNNN",
+    "amount_sign": "All CSV amount fields are positive. Use txn_type to distinguish charge, refund, payment, deposit, and transfer."
+  },
+  "aggregation_rules": [
+    "Count spend from posted card charges and bank purchases that are not transfers.",
+    "Never add online order totals on top of matched card charges.",
+    "online_orders.csv is line-item grain. Use one order_total per distinct order_id.",
+    "Each card txn_id may be consumed by at most one match group.",
+    "Checking autopay that pays the card is a transfer, not spend.",
+    "Do not invent fees, tax, order numbers, or refunds that are absent from these files."
+  ],
+  "posted_card_charges": [
+    {"txn_id": "CC-202609-007", "amount": 24.99},
+    {"txn_id": "CC-202609-001", "amount": 42.16},
+    {"txn_id": "CC-202609-008", "amount": 95.33},
+    {"txn_id": "CC-202609-002", "amount": 54.99},
+    {"txn_id": "CC-202609-003", "amount": 32.51},
+    {"txn_id": "CC-202609-004", "amount": 29.99},
+    {"txn_id": "CC-202609-005", "amount": 29.99},
+    {"txn_id": "CC-202609-006", "amount": 54.99},
+    {"txn_id": "CC-202609-009", "amount": 72.40}
+  ],
+  "posted_card_payments": [
+    {"txn_id": "CC-202609-010", "amount": 1204.0, "counterpart_bank_txn_id": "BK-202609-002"}
+  ],
+  "posted_bank_transfers": [
+    {"txn_id": "BK-202609-002", "amount": 1204.0, "kind": "credit_card_payment"},
+    {"txn_id": "BK-202609-003", "amount": 500.0, "kind": "savings_transfer"}
+  ],
+  "posted_bank_deposits": [
+    {"txn_id": "BK-202609-001", "amount": 3500.0, "kind": "payroll"}
+  ],
+  "orders": [
+    {"order_id": "ORD-AMZ-1001", "order_total": 42.16, "item_rows": 2, "line_total_sum": 38.99, "tax": 3.17, "shipping": 0.0},
+    {"order_id": "ORD-AMZ-1002", "order_total": 87.5, "item_rows": 3, "line_total_sum": 81.97, "tax": 5.53, "shipping": 0.0},
+    {"order_id": "ORD-AMZ-1003", "order_total": 29.99, "item_rows": 1, "line_total_sum": 27.52, "tax": 2.47, "shipping": 0.0},
+    {"order_id": "ORD-AMZ-1004", "order_total": 49.99, "item_rows": 1, "line_total_sum": 45.99, "tax": 4.0, "shipping": 0.0},
+    {"order_id": "ORD-AMZ-1005", "order_total": 24.99, "item_rows": 1, "line_total_sum": 22.99, "tax": 2.0, "shipping": 0.0, "refund_amount": 24.99, "refund_date": "2026-09-25"},
+    {"order_id": "ORD-COSTCO-2001", "order_total": 95.33, "item_rows": 3, "line_total_sum": 88.47, "tax": 6.86, "shipping": 0.0}
+  ],
+  "matches": [
+    {
+      "match_id": "M-001",
+      "scenario": "normal_matched_purchase",
+      "status": "matched",
+      "statement_txn_ids": ["CC-202609-001"],
+      "order_ids": ["ORD-AMZ-1001"],
+      "evidence_files": ["sample_data/amazon_receipt.eml"],
+      "statement_amount_sum": 42.16,
+      "order_total": 42.16,
+      "spend_event_amount": 42.16,
+      "notes": "Card, order, and email receipt all equal 42.16. Count spend once."
+    },
+    {
+      "match_id": "M-002",
+      "scenario": "amazon_split_shipment",
+      "status": "matched_split_shipment",
+      "statement_txn_ids": ["CC-202609-002", "CC-202609-003"],
+      "order_ids": ["ORD-AMZ-1002"],
+      "evidence_files": [],
+      "statement_amount_sum": 87.5,
+      "order_total": 87.5,
+      "spend_event_amount": 87.5,
+      "allocation": {
+        "CC-202609-002": {"shipment_id": "SHIP-1002-A", "amount": 54.99},
+        "CC-202609-003": {"shipment_id": "SHIP-1002-B", "amount": 32.51}
+      },
+      "notes": "One order, two card charges. Spend is 87.50 once, not 54.99 + 32.51 + 87.50."
+    },
+    {
+      "match_id": "M-003",
+      "scenario": "possible_duplicate_card_charge",
+      "status": "matched_with_duplicate_exception",
+      "statement_txn_ids": ["CC-202609-004"],
+      "order_ids": ["ORD-AMZ-1003"],
+      "evidence_files": [],
+      "statement_amount_sum": 29.99,
+      "order_total": 29.99,
+      "spend_event_amount": 29.99,
+      "notes": "Only CC-202609-004 is the spend event. CC-202609-005 stays an exception."
+    },
+    {
+      "match_id": "M-004",
+      "scenario": "merchant_name_variation",
+      "status": "matched",
+      "statement_txn_ids": ["CC-202609-008"],
+      "order_ids": ["ORD-COSTCO-2001"],
+      "evidence_files": [],
+      "statement_amount_sum": 95.33,
+      "order_total": 95.33,
+      "spend_event_amount": 95.33,
+      "merchant_raw_card": "COSTCO.COM *8282",
+      "merchant_raw_order": "Costco Wholesale",
+      "notes": "Same dollars. Names differ. Count spend once."
+    },
+    {
+      "match_id": "M-005",
+      "scenario": "credit_card_payment_from_bank",
+      "status": "excluded_transfer",
+      "statement_txn_ids": ["CC-202609-010"],
+      "bank_txn_ids": ["BK-202609-002"],
+      "order_ids": [],
+      "amount": 1204.0,
+      "spend_event_amount": 0.0,
+      "notes": "Card payment from checking. Not a purchase. Not Amazon or Costco spend."
+    }
+  ],
+  "exceptions": [
+    {
+      "exception_id": "EX-001",
+      "scenario": "possible_duplicate_card_charge",
+      "type": "possible_duplicate",
+      "statement_txn_ids": ["CC-202609-005"],
+      "related_txn_ids": ["CC-202609-004"],
+      "order_ids": ["ORD-AMZ-1003"],
+      "amount": 29.99,
+      "expected_resolution": "Keep open until the user confirms a true duplicate or a second purchase. Do not count 29.99 twice.",
+      "spend_until_resolved": 0.0
+    },
+    {
+      "exception_id": "EX-002",
+      "scenario": "missing_refund",
+      "type": "missing_refund",
+      "statement_txn_ids": ["CC-202609-007"],
+      "order_ids": ["ORD-AMZ-1005"],
+      "order_refund_amount": 24.99,
+      "order_refund_date": "2026-09-25",
+      "card_refund_txn_ids": [],
+      "amount": 24.99,
+      "expected_resolution": "Investigate Amazon refund status. Charge remains posted spend until a card refund appears.",
+      "spend_until_resolved": 24.99
+    },
+    {
+      "exception_id": "EX-003",
+      "scenario": "order_card_amount_mismatch",
+      "type": "amount_mismatch",
+      "statement_txn_ids": ["CC-202609-006"],
+      "order_ids": ["ORD-AMZ-1004"],
+      "statement_amount": 54.99,
+      "order_total": 49.99,
+      "gap": 5.0,
+      "expected_resolution": "Cite CC-202609-006 and ORD-AMZ-1004 only. Do not invent a tax or marketplace fee line.",
+      "spend_until_resolved": 54.99,
+      "include_in_category_totals": false
+    },
+    {
+      "exception_id": "EX-004",
+      "scenario": "purchase_without_receipt",
+      "type": "unmatched_statement",
+      "statement_txn_ids": ["CC-202609-009"],
+      "order_ids": [],
+      "evidence_files": [],
+      "amount": 72.4,
+      "expected_resolution": "Leave unmatched. Do not fabricate a Whole Foods receipt.",
+      "spend_until_resolved": 72.4,
+      "include_in_category_totals": false
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "normal_matched_purchase",
+      "expected_result": "CC-202609-001 matches ORD-AMZ-1001 and amazon_receipt.eml at 42.16. One spend event of 42.16."
+    },
+    {
+      "id": "amazon_split_shipment",
+      "expected_result": "CC-202609-002 (54.99) and CC-202609-003 (32.51) both match ORD-AMZ-1002 (87.50). One spend event of 87.50."
+    },
+    {
+      "id": "possible_duplicate_card_charge",
+      "expected_result": "CC-202609-004 matches ORD-AMZ-1003 at 29.99. CC-202609-005 is a possible_duplicate exception and is not spend."
+    },
+    {
+      "id": "missing_refund",
+      "expected_result": "ORD-AMZ-1005 shows refund_issued 24.99 on 2026-09-25. Card has charge CC-202609-007 and no refund. Exception missing_refund. Posted spend remains 24.99."
+    },
+    {
+      "id": "order_card_amount_mismatch",
+      "expected_result": "ORD-AMZ-1004 is 49.99 and CC-202609-006 is 54.99. Exception amount_mismatch with gap 5.00. Count posted card 54.99 as spend, not 49.99, and not 54.99+49.99."
+    },
+    {
+      "id": "credit_card_payment_from_bank",
+      "expected_result": "BK-202609-002 and CC-202609-010 are the same 1204.00 payment. Exclude from spend. Do not treat as a Costco or Amazon purchase."
+    },
+    {
+      "id": "purchase_without_receipt",
+      "expected_result": "CC-202609-009 Whole Foods 72.40 has no order or email. Exception unmatched_statement. Spend 72.40 stays out of matched category totals."
+    },
+    {
+      "id": "merchant_name_variation",
+      "expected_result": "COSTCO.COM *8282 CC-202609-008 matches Costco Wholesale ORD-COSTCO-2001 at 95.33 despite the name difference. One spend event of 95.33."
+    }
+  ],
+  "totals": {
+    "card_charge_count": 9,
+    "card_charge_sum": 437.35,
+    "duplicate_excluded_from_spend": 29.99,
+    "card_payment_excluded_from_spend": 1204.0,
+    "bank_transfers_excluded_from_spend": 1704.0,
+    "order_total_if_summed_by_distinct_order_id": 329.96,
+    "order_total_if_wrongly_summed_across_item_rows": 737.78,
+    "matched_spend_for_insights": 254.98,
+    "posted_spend_counted_once": 407.36,
+    "open_exception_count": 4,
+    "unresolved_exception_amounts": {
+      "EX-001_possible_duplicate": 29.99,
+      "EX-002_missing_refund": 24.99,
+      "EX-003_amount_gap": 5.0,
+      "EX-004_unmatched_statement": 72.4
+    }
+  },
+  "consistency_checks": {
+    "split_shipment_sum_equals_order_total": "54.99 + 32.51 = 87.50",
+    "normal_match_email_order_card": "42.16",
+    "costco_order_equals_card": "95.33",
+    "duplicate_pair_same_amount": "29.99",
+    "mismatch_gap": "54.99 - 49.99 = 5.00",
+    "payment_card_equals_bank": "1204.00",
+    "order_line_math": "each distinct order_id has sum(line_total) + order_tax + order_shipping = order_total",
+    "posted_spend_counted_once_formula": "card_charge_sum 437.35 - duplicate 29.99 = 407.36",
+    "matched_spend_for_insights_formula": "42.16 + 87.50 + 29.99 + 95.33 = 254.98"
+  }
+}

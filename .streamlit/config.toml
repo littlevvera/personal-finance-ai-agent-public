@@ -1,0 +1,15 @@
+[theme]
+base = "light"
+primaryColor = "#1769d1"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f5f9ff"
+textColor = "#15345b"
+font = "sans serif"
+borderColor = "#dce6f2"
+linkColor = "#1769d1"
+baseRadius = "0.5rem"
+showWidgetBorder = true
+dataframeBorderColor = "#dce6f2"
+dataframeHeaderBackgroundColor = "#f5f9ff"
+baseFontSize = 18
+headingFontSizes = ["2.875rem", "1.8125rem", "1.4375rem", "1.25rem", "1.125rem", "1rem"]
